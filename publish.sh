@@ -7,6 +7,10 @@ if test "$username" = "jingchuang"; then
     else
         npm version $1 --no-git-tag-version
     fi
+    if [ -d "lib" ];then
+        rm -r lib
+    fi
+    npm run build
     npm publish
 else
     echo "please login with jingchuang account"

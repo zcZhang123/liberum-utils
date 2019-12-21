@@ -3,7 +3,7 @@ const { soliditySha3 } = require("web3-utils");
 const Hex = require('crypto-js/enc-hex');
 const sha3 = require('crypto-js/sha3');
 
-import ABIs from './utils/ABIs';
+import { asmABI, dappABI } from './utils/ABIs';
 import { chain3Instance } from './utils/index'
 import { Account, VRS } from "./model";
 
@@ -23,9 +23,9 @@ class Liberum {
             Liberum.dappAddr = dappAddr;
             Liberum.subchainaddr = subchainaddr;
             Liberum.chain3 = chain3Instance(vnodeUri, scsUri);
-            var mcObject = Liberum.chain3.microchain(ABIs.asmABI);
+            var mcObject = Liberum.chain3.microchain(asmABI);
             mcObject.setVnodeAddress(vnodeVia);
-            Liberum.tokenContract = mcObject.getDapp(subchainaddr, ABIs.dappABI, dappAddr);
+            Liberum.tokenContract = mcObject.getDapp(subchainaddr, dappABI, dappAddr);
         } catch (error) {
             return error
         }
@@ -406,7 +406,7 @@ class Liberum {
             Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash) {
                 if (!err) {
                     var filter = Liberum.chain3.mc.filter('latest');
-                    filter.watch(function (error, result) {
+                    filter.watch(function (error) {
                         var receipt = Liberum.chain3.mc.getTransactionReceipt(hash);
                         if (!error && receipt && receipt.status != "0x0") {
                             resolve({ "result": "success", "hash": hash });
@@ -451,7 +451,7 @@ class Liberum {
             Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash) {
                 if (!err) {
                     var filter = Liberum.chain3.mc.filter('latest');
-                    filter.watch(function (error, result) {
+                    filter.watch(function (error) {
                         var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
                         if (!error && receipt && !receipt.failed) {
                             resolve({ "result": "success", "hash": hash });
