@@ -2,7 +2,11 @@
   "name": "liberum-utils",
   "version": "1.0.0",
   "description": "liberum utils",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "deploy": "./publish.sh",
