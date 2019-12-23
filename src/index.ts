@@ -407,15 +407,16 @@ class Liberum {
                 if (!err) {
                     var filter = Liberum.chain3.mc.filter('latest');
                     filter.watch(function (error) {
-                        var receipt = Liberum.chain3.mc.getTransactionReceipt(hash);
-                        if (!error && receipt && receipt.status != "0x0") {
+                        var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
+                        if (!error && receipt && !receipt.failed) {
                             resolve({ "result": "success", "hash": hash });
                             filter.stopWatching();
-                        } else {
-                            if (receipt && receipt.status == "0x0") {
-                                reject({ "result": "error", "hash": hash });
-                            }
-                            reject(error);
+                        } else if (!error && receipt && receipt.failed) {
+                            resolve({ "result": "error", "hash": hash });
+                            filter.stopWatching();
+                        } else if (error) {
+                            resolve(error);
+                            filter.stopWatching();
                         }
                     });
                 } else {
@@ -453,14 +454,17 @@ class Liberum {
                     var filter = Liberum.chain3.mc.filter('latest');
                     filter.watch(function (error) {
                         var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
-                        if (!error && receipt && !receipt.failed) {
-                            resolve({ "result": "success", "hash": hash });
-                            filter.stopWatching();
-                        } else {
-                            if (receipt && receipt.failed) {
+                        if (!error) {
+                            if (!error && receipt && !receipt.failed) {
+                                resolve({ "result": "success", "hash": hash });
+                                filter.stopWatching();
+                            } else if (!error && receipt && receipt.failed) {
                                 reject({ "result": "error", "hash": hash });
+                                filter.stopWatching();
+                            } else if (error) {
+                                resolve(error);
+                                filter.stopWatching();
                             }
-                            reject(error);
                         }
                     });
                 } else {
