@@ -1,3 +1,12 @@
+export interface InitConfig {
+    vnodeUri: string,
+    scsUri: string,
+    vnodeVia: string,
+    baseAddr: string,
+    dappAddr: string,
+    subchainAddr: string
+}
+
 export interface Account {
     address: string;
     secret: string;

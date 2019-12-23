@@ -5,7 +5,7 @@ const sha3 = require('crypto-js/sha3');
 
 import { asmABI, dappABI } from './utils/ABIs';
 import { chain3Instance } from './utils/index'
-import { Account, VRS } from "./model";
+import { InitConfig, Account, VRS } from "./model";
 
 
 class Liberum {
@@ -16,16 +16,16 @@ class Liberum {
     private static chain3: any;
     private static tokenContract: any;
 
-    public static init(vnodeUri: string, scsUri: string, vnodeVia: string, baseaddr: string, dappAddr: string, subchainaddr: string) {
+    public static init(InitConfig: InitConfig) {
         try {
-            Liberum.vnodeVia = vnodeVia;
-            Liberum.baseaddr = baseaddr;
-            Liberum.dappAddr = dappAddr;
-            Liberum.subchainaddr = subchainaddr;
-            Liberum.chain3 = chain3Instance(vnodeUri, scsUri);
+            Liberum.vnodeVia = InitConfig.vnodeVia;
+            Liberum.baseaddr = InitConfig.baseAddr;
+            Liberum.dappAddr = InitConfig.dappAddr;
+            Liberum.subchainaddr = InitConfig.subchainAddr;
+            Liberum.chain3 = chain3Instance(InitConfig.vnodeUri, InitConfig.scsUri);
             var mcObject = Liberum.chain3.microchain(asmABI);
-            mcObject.setVnodeAddress(vnodeVia);
-            Liberum.tokenContract = mcObject.getDapp(subchainaddr, dappABI, dappAddr);
+            mcObject.setVnodeAddress(InitConfig.vnodeVia);
+            Liberum.tokenContract = mcObject.getDapp(InitConfig.subchainAddr, dappABI, InitConfig.dappAddr);
         } catch (error) {
             return error
         }
