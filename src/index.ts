@@ -412,7 +412,7 @@ class Liberum {
                             resolve({ "result": "success", "hash": hash });
                             filter.stopWatching();
                         } else {
-                            if (receipt.status == "0x0") {
+                            if (receipt && receipt.status == "0x0") {
                                 reject({ "result": "error", "hash": hash });
                             }
                             reject(error);
@@ -457,7 +457,7 @@ class Liberum {
                             resolve({ "result": "success", "hash": hash });
                             filter.stopWatching();
                         } else {
-                            if (receipt.failed) {
+                            if (receipt && receipt.failed) {
                                 reject({ "result": "error", "hash": hash });
                             }
                             reject(error);
