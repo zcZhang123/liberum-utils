@@ -339,7 +339,7 @@ class Liberum {
      * @param {address} tokenGive 挂单付出token地址
      * @param {number} amountGive 挂单付出token数量
      * @param {number} nonce 挂单时nonce
-     * @param {number} blockNum 挂单时nonce
+     * @param {number} blockNum 挂单时blockNum
      * @param {VRS} VRS  挂单时VRS
      */
     public static async cancelOrder(account: Account, tokenGet: string, amountGet: number, tokenGive: string, amountGive: number, nonce: number, blockNum: number, VRS: VRS) {

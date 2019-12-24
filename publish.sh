@@ -1,7 +1,7 @@
 #!/bin/bash
 username=`npm whoami`
 echo $username
-if test "$username" = "jingchuang"; then
+if test "$username" = "zczhang"; then
     if test "$1" = "";then
         npm version patch --no-git-tag-version
     else
@@ -13,6 +13,6 @@ if test "$username" = "jingchuang"; then
     npm run build
     npm publish
 else
-    echo "please login with jingchuang account"
+    echo "please login with zczhang account"
     exit 0
 fi
