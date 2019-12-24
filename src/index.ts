@@ -195,6 +195,7 @@ class Liberum {
      */
     public static async depositToken(account: Account, token: string, value: number) {
         try {
+            await Liberum.approve(account, Liberum.dappAddr, token, value)
             var data = Liberum.dappAddr + Liberum.chain3.sha3('depositToken(address,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256'], [token, Liberum.chain3.toSha(value, 'mc')]);
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
@@ -227,7 +228,14 @@ class Liberum {
      * @param {address} address 查询地址
      */
     public static bablanceOf(token: string, address: string) {
-        return Liberum.chain3.fromSha(Liberum.tokenContract.balanceOf(token, address))
+        return new Promise(function (resolve, reject) {
+            try {
+                let balance = Liberum.tokenContract.balanceOf(token, address)
+                resolve(Liberum.chain3.fromSha(balance));
+            } catch (error) {
+                reject(error)
+            }
+        })
     }
 
     /**
