@@ -227,7 +227,7 @@ class Liberum {
      * @param {address} token token地址
      * @param {address} address 查询地址
      */
-    public static bablanceOf(token: string, address: string) {
+    public static balanceOf(token: string, address: string) {
         return new Promise(function (resolve, reject) {
             try {
                 let balance = Liberum.tokenContract.balanceOf(token, address)
