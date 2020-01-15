@@ -10,7 +10,6 @@ import { InitConfig, Account, VRS } from "./model";
 
 class Liberum {
     private static vnodeVia: string;
-    private static baseaddr: string;
     private static dappAddr: string;
     private static subchainaddr: string;
     private static chain3: any;
@@ -19,7 +18,6 @@ class Liberum {
     public static init(InitConfig: InitConfig) {
         try {
             Liberum.vnodeVia = InitConfig.vnodeVia;
-            Liberum.baseaddr = InitConfig.baseAddr;
             Liberum.dappAddr = InitConfig.dappAddr;
             Liberum.subchainaddr = InitConfig.subchainAddr;
             Liberum.chain3 = chain3Instance(InitConfig.vnodeUri, InitConfig.scsUri);
@@ -57,14 +55,14 @@ class Liberum {
 
     /**
      * 修改账户等级控制合约地址
+     * @param  {Account} baseAccount 合约部署者账户
      * @param {address} accountLevelsAddr 修改账户地址
-     * @param {string} secret 合约部署者密钥
      */
-    public static async changeAccountLevelsAddr(accountLevelsAddr: string, secret: string) {
+    public static async changeAccountLevelsAddr(baseAccount: Account, accountLevelsAddr: string) {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('changeAccountLevelsAddr(address)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [accountLevelsAddr]);
-            let res = await Liberum.sendRawTransaction(Liberum.baseaddr, secret, 0, data);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
             return res;
         } catch (error) {
             return error
@@ -73,15 +71,15 @@ class Liberum {
 
     /**
      * 修改手续费缴纳账户
+     * @param  {Account} baseAccount 合约部署者账户
      * @param {address}  feeAccount 缴费账户
-     * @param {string} secret   合约部署者密钥
      */
-    public static async changeFeeAccount(feeAccount: string, secret: string) {
+    public static async changeFeeAccount(baseAccount: Account, feeAccount: string) {
         try {
             if (Liberum.chain3.isAddress(feeAccount)) {
                 var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeAccount(address)').substr(2, 8)
                     + Liberum.chain3.encodeParams(['address'], [feeAccount]);
-                let res = await Liberum.sendRawTransaction(Liberum.baseaddr, secret, 0, data)
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
                 return "地址错误";
@@ -93,16 +91,16 @@ class Liberum {
 
     /**
      * 修改成交方手续费,需不高于当前值
+     * @param  {Account} baseAccount 合约部署者账户
      * @param {number} feeMake 手续费
-     * @param {string} secret 合约部署者密钥
      */
-    public static async changeFeeMake(feeMake: number, secret: string) {
+    public static async changeFeeMake(baseAccount: Account, feeMake: number) {
         try {
             var beforeFeeMake = Liberum.chain3.fromSha(this.tokenContract.feeMake());
             if (feeMake < beforeFeeMake) {
                 var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeMake(uint256)').substr(2, 8)
                     + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeMake, 'mc')]);
-                let res = await Liberum.sendRawTransaction(Liberum.baseaddr, secret, 0, data)
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
                 return "修改手续费等于/大于当前值"
@@ -114,17 +112,17 @@ class Liberum {
 
     /**
      *  修改被成交方手续费，需不高于当前值且不小于当前回扣值(feeRebate)
+     * @param  {Account} baseAccount 合约部署者账户
      * @param {number} feeTake 修改后被成交方的手续费
-     * @param {string} secret 合约部署者密钥
      */
-    public static async changeFeeTake(feeTake: number, secret: string) {
+    public static async changeFeeTake(baseAccount: Account, feeTake: number) {
         try {
             var beforeFeeTake = Liberum.chain3.fromSha(Liberum.tokenContract.feeTake());
             var beforeFeeRebate = Liberum.chain3.fromSha(Liberum.tokenContract.feeRebate());
             if (feeTake < beforeFeeTake && feeTake > beforeFeeRebate) {
                 var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeTake(uint256)').substr(2, 8)
                     + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeTake, 'mc')]);
-                let res = await Liberum.sendRawTransaction(Liberum.baseaddr, secret, 0, data)
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
                 return "被成交方手续费需不高于当前值且不小于当前回扣值(feeRebate)"
@@ -136,17 +134,17 @@ class Liberum {
 
     /**
      * 修改回扣值，需不小于当前值且不高于被成交方手续费(feeTake)
+     * @param  {Account} baseAccount 合约部署者账户
      * @param {number} feeRebate 回扣值
-     * @param {string} secret 合约部署者密钥
      */
-    public static async changeFeeRebate(feeRebate: number, secret: string) {
+    public static async changeFeeRebate(baseAccount: Account, feeRebate: number) {
         try {
             var beforeFeeTake = Liberum.chain3.fromSha(Liberum.tokenContract.feeTake());
             var beforeFeeRebate = Liberum.chain3.fromSha(Liberum.tokenContract.feeRebate());
             if (feeRebate > beforeFeeRebate && feeRebate < beforeFeeTake) {
                 var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeRebate(uint256)').substr(2, 8)
                     + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeRebate, 'mc')]);
-                let res = await Liberum.sendRawTransaction(Liberum.baseaddr, secret, 0, data)
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
                 return "修改后的回扣值需不小于当前值且不高于被成交方手续费(feeTake)"
