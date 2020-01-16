@@ -25,7 +25,7 @@ class Liberum {
             mcObject.setVnodeAddress(InitConfig.vnodeVia);
             Liberum.tokenContract = mcObject.getDapp(InitConfig.subchainAddr, dappABI, InitConfig.dappAddr);
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -49,7 +49,7 @@ class Liberum {
                 feeRebate: feeRebate
             }
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -65,7 +65,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -82,10 +82,10 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                return "地址错误";
+                throw new Error('invalid address'); 
             }
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -103,10 +103,10 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                return "修改手续费等于/大于当前值"
+                throw new Error('invalid feeMake'); 
             }
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -125,10 +125,10 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                return "被成交方手续费需不高于当前值且不小于当前回扣值(feeRebate)"
+                throw new Error('invalid feeRebate'); 
             }
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -147,10 +147,10 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                return "修改后的回扣值需不小于当前值且不高于被成交方手续费(feeTake)"
+                throw new Error('invalid feeTake'); 
             }
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -165,7 +165,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, value, data)
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -181,7 +181,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -199,7 +199,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -216,7 +216,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -258,7 +258,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return { res, nonce, blockNum, VRS };
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -285,7 +285,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -306,7 +306,7 @@ class Liberum {
                 VRS.v_decimal, VRS.r, VRS.s);
             return Liberum.chain3.fromSha(res);
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -325,7 +325,7 @@ class Liberum {
             var res = Liberum.tokenContract.amountFilled(tokenGet, Liberum.chain3.toSha(amountGet, 'mc'), tokenGive, Liberum.chain3.toSha(amountGive, 'mc'), blockNum, nonce, user);
             return Liberum.chain3.fromSha(res);
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -350,7 +350,7 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return res;
         } catch (error) {
-            return error
+            throw error
         }
     }
 
@@ -383,7 +383,7 @@ class Liberum {
             }
             return { v_decimal, r, s }
         } catch (error) {
-            return error
+            throw error
         }
     }
 
