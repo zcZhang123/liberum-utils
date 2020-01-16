@@ -409,22 +409,18 @@ class Liberum {
                 data: data
             };
             var signTx = Liberum.chain3.signTransaction(rawTx, secret);
-            Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash) {
+            Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash: string) {
                 if (!err) {
-                    var filter = Liberum.chain3.mc.filter('latest');
-                    filter.watch(function (error) {
+                    while (true) {
                         var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
-                        if (!error && receipt && !receipt.failed) {
+                        if (receipt && !receipt.failed) {
                             resolve({ "result": "success", "hash": hash });
-                            filter.stopWatching();
-                        } else if (!error && receipt && receipt.failed) {
+                            break;
+                        } else if (receipt && receipt.failed) {
                             resolve({ "result": "error", "hash": hash });
-                            filter.stopWatching();
-                        } else if (error) {
-                            resolve(error);
-                            filter.stopWatching();
+                            break;
                         }
-                    });
+                    }
                 } else {
                     reject(err.message);
                 }
@@ -455,24 +451,18 @@ class Liberum {
                     Liberum.chain3.encodeParams(['address', 'uint256'], [to, Liberum.chain3.toSha(amount, 'mc')])
             };
             var signTx = Liberum.chain3.signTransaction(rawTx, account.secret);
-            Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash) {
+            Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash: string) {
                 if (!err) {
-                    var filter = Liberum.chain3.mc.filter('latest');
-                    filter.watch(function (error) {
+                    while (true) {
                         var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
-                        if (!error) {
-                            if (!error && receipt && !receipt.failed) {
-                                resolve({ "result": "success", "hash": hash });
-                                filter.stopWatching();
-                            } else if (!error && receipt && receipt.failed) {
-                                reject({ "result": "error", "hash": hash });
-                                filter.stopWatching();
-                            } else if (error) {
-                                resolve(error);
-                                filter.stopWatching();
-                            }
+                        if (receipt && !receipt.failed) {
+                            resolve({ "result": "success", "hash": hash });
+                            break;
+                        } else if (receipt && receipt.failed) {
+                            resolve({ "result": "error", "hash": hash });
+                            break;
                         }
-                    });
+                    }
                 } else {
                     reject(err.message);
                 }
