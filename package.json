@@ -1,6 +1,6 @@
 {
   "name": "liberum-utils",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "liberum utils",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/zcZhang123/liberum-utils#readme",
   "dependencies": {
+    "bignumber.js": "^9.0.0",
     "chain3": "^0.1.22",
     "eth-crypto": "^1.5.0",
     "keythereum": "^1.0.4",

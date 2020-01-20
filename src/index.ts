@@ -2,6 +2,7 @@ const EthCrypto = require('eth-crypto');
 const { soliditySha3 } = require("web3-utils");
 const Hex = require('crypto-js/enc-hex');
 const sha3 = require('crypto-js/sha3');
+// const BigNumber = require('bignumber.js');
 
 import { asmABI, dappABI } from './utils/ABIs';
 import { chain3Instance } from './utils/index'
@@ -82,7 +83,7 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                throw new Error('invalid address'); 
+                throw new Error('invalid address');
             }
         } catch (error) {
             throw error
@@ -103,7 +104,7 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                throw new Error('invalid feeMake'); 
+                throw new Error('invalid feeMake');
             }
         } catch (error) {
             throw error
@@ -125,7 +126,7 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                throw new Error('invalid feeRebate'); 
+                throw new Error('invalid feeRebate');
             }
         } catch (error) {
             throw error
@@ -147,7 +148,7 @@ class Liberum {
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
                 return res;
             } else {
-                throw new Error('invalid feeTake'); 
+                throw new Error('invalid feeTake');
             }
         } catch (error) {
             throw error
@@ -221,14 +222,23 @@ class Liberum {
     }
 
     /**
-     * 合约余额查询
+     * 合约充提余额查询
      * @param {address} token token地址
      * @param {address} address 查询地址
      */
     public static balanceOf(token: string, address: string) {
         return new Promise(function (resolve, reject) {
             try {
+                // var mcObject = Liberum.chain3.microchain();
+                // mcObject.setVnodeAddress(Liberum.vnodeVia);
+                // var tokenContract = mcObject.getDapp(Liberum.subchainaddr, JSON.parse(erc20ABI), token);
+                // let tokenBalance = tokenContract.balanceOf(address);
+                // let decimals = tokenContract.decimals();
                 let balance = Liberum.tokenContract.balanceOf(token, address)
+                // let data = {
+                //     balance: new BigNumber(Liberum.chain3.fromSha(balance)).toString(),
+                //     erc20Balance: new BigNumber(tokenBalance).dividedBy(Math.pow(10, decimals)).toString()
+                // }
                 resolve(Liberum.chain3.fromSha(balance));
             } catch (error) {
                 reject(error)
