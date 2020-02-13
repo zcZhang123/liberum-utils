@@ -2,9 +2,9 @@ const EthCrypto = require('eth-crypto');
 const { soliditySha3 } = require("web3-utils");
 const Hex = require('crypto-js/enc-hex');
 const sha3 = require('crypto-js/sha3');
-// const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js');
 
-import { asmABI, dappABI } from './utils/ABIs';
+import { asmABI, dappABI, erc20ABI } from './utils/ABIs';
 import { chain3Instance } from './utils/index'
 import { InitConfig, Account, VRS } from "./model";
 
@@ -15,6 +15,7 @@ class Liberum {
     private static subchainaddr: string;
     private static chain3: any;
     private static tokenContract: any;
+    private static mcObject: any;
 
     public static init(InitConfig: InitConfig) {
         try {
@@ -22,9 +23,9 @@ class Liberum {
             Liberum.dappAddr = InitConfig.dappAddr;
             Liberum.subchainaddr = InitConfig.subchainAddr;
             Liberum.chain3 = chain3Instance(InitConfig.vnodeUri, InitConfig.scsUri);
-            var mcObject = Liberum.chain3.microchain(asmABI);
-            mcObject.setVnodeAddress(InitConfig.vnodeVia);
-            Liberum.tokenContract = mcObject.getDapp(InitConfig.subchainAddr, dappABI, InitConfig.dappAddr);
+            Liberum.mcObject = Liberum.chain3.microchain(asmABI);
+            Liberum.mcObject.setVnodeAddress(InitConfig.vnodeVia);
+            Liberum.tokenContract = Liberum.mcObject.getDapp(InitConfig.subchainAddr, dappABI, InitConfig.dappAddr);
         } catch (error) {
             throw error
         }
@@ -226,20 +227,20 @@ class Liberum {
      * @param {address} token token地址
      * @param {address} address 查询地址
      */
-    public static balanceOf(token: string, address: string) {
+    public static balanceOf(token: string[], address: string) {
         return new Promise(function (resolve, reject) {
             try {
-                // var mcObject = Liberum.chain3.microchain();
-                // mcObject.setVnodeAddress(Liberum.vnodeVia);
-                // var tokenContract = mcObject.getDapp(Liberum.subchainaddr, JSON.parse(erc20ABI), token);
-                // let tokenBalance = tokenContract.balanceOf(address);
-                // let decimals = tokenContract.decimals();
+                let tokenContract = Liberum.mcObject.getDapp(Liberum.subchainaddr, JSON.parse(erc20ABI), token);
+                let tokenBalance = tokenContract.balanceOf(address);
+                let decimals = tokenContract.decimals();
                 let balance = Liberum.tokenContract.balanceOf(token, address)
-                // let data = {
-                //     balance: new BigNumber(Liberum.chain3.fromSha(balance)).toString(),
-                //     erc20Balance: new BigNumber(tokenBalance).dividedBy(Math.pow(10, decimals)).toString()
-                // }
-                resolve(Liberum.chain3.fromSha(balance));
+                let data = {
+                    balance: new BigNumber(Liberum.chain3.fromSha(balance[0])).toString(),
+                    freeze: new BigNumber(Liberum.chain3.fromSha(balance[1])).toString(),
+                    erc20Balance: new BigNumber(tokenBalance).dividedBy(Math.pow(10, decimals)).toString()
+                }
+
+                resolve(data);
             } catch (error) {
                 reject(error)
             }
@@ -322,7 +323,7 @@ class Liberum {
 
     /**
      * 获取挂单成交额
-     * @param {address} tokenGet 挂单获取token地址
+     * @param  {address} tokenGet 挂单获取token地址
      * @param  {number} amountGet 挂单获取token数量
      * @param  {address} tokenGive 挂单付出token地址
      * @param  {number} amountGive 挂单付出token数量
