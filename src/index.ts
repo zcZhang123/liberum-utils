@@ -227,7 +227,7 @@ class Liberum {
      * @param {address} token token地址
      * @param {address} address 查询地址
      */
-    public static balanceOf(token: string[], address: string) {
+    public static balanceOf(token: string, address: string) {
         return new Promise(function (resolve, reject) {
             try {
                 let tokenContract = Liberum.mcObject.getDapp(Liberum.subchainaddr, JSON.parse(erc20ABI), token);
@@ -235,8 +235,9 @@ class Liberum {
                 let decimals = tokenContract.decimals();
                 let balance = Liberum.tokenContract.balanceOf(token, address)
                 let data = {
-                    balance: new BigNumber(Liberum.chain3.fromSha(balance[0])).toString(),
-                    freeze: new BigNumber(Liberum.chain3.fromSha(balance[1])).toString(),
+                    balance: new BigNumber(Liberum.chain3.fromSha(balance)).toString(),
+                    // balance: new BigNumber(Liberum.chain3.fromSha(balance[0])).toString(),
+                    // freeze: new BigNumber(Liberum.chain3.fromSha(balance[1])).toString(),
                     erc20Balance: new BigNumber(tokenBalance).dividedBy(Math.pow(10, decimals)).toString()
                 }
 
