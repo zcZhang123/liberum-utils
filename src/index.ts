@@ -302,8 +302,8 @@ class Liberum {
      */
     public static async cancelOrder(account: Account, tokenGet: string, amountGet: number, tokenGive: string, amountGive: number, nonce: number, blockNum: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('cancelOrder(address,uint256,address,uint256,uint256,uint256,uint8,bytes32,bytes32)').substr(2, 8)
-                + Liberum.chain3.encodeParams(['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256', 'address', 'uint8', 'bytes32', 'bytes32', 'uint256'],
+            var data = Liberum.dappAddr + Liberum.chain3.sha3('cancelOrder(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
+                + Liberum.chain3.encodeParams(['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
                     [tokenGet, Liberum.chain3.toSha(amountGet, 'mc'), tokenGive, Liberum.chain3.toSha(amountGive, 'mc'), blockNum, nonce]);
 
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
