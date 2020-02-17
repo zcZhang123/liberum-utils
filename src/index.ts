@@ -96,15 +96,10 @@ class Liberum {
      */
     public static async changeFeeMake(baseAccount: Account, feeMake: number) {
         try {
-            var beforeFeeMake = Liberum.chain3.fromSha(this.tokenContract.feeMake());
-            if (feeMake < beforeFeeMake) {
-                var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeMake(uint256)').substr(2, 8)
-                    + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeMake, 'mc')]);
-                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
-                return res;
-            } else {
-                throw new Error('invalid feeMake');
-            }
+            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeMake(uint256)').substr(2, 8)
+                + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeMake, 'mc')]);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            return res;
         } catch (error) {
             throw error
         }
@@ -117,16 +112,10 @@ class Liberum {
      */
     public static async changeFeeTake(baseAccount: Account, feeTake: number) {
         try {
-            var beforeFeeTake = Liberum.chain3.fromSha(Liberum.tokenContract.feeTake());
-            var beforeFeeRebate = Liberum.chain3.fromSha(Liberum.tokenContract.feeRebate());
-            if (feeTake < beforeFeeTake && feeTake > beforeFeeRebate) {
-                var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeTake(uint256)').substr(2, 8)
-                    + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeTake, 'mc')]);
-                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
-                return res;
-            } else {
-                throw new Error('invalid feeRebate');
-            }
+            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeTake(uint256)').substr(2, 8)
+                + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeTake, 'mc')]);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            return res;
         } catch (error) {
             throw error
         }
@@ -139,16 +128,10 @@ class Liberum {
      */
     public static async changeFeeRebate(baseAccount: Account, feeRebate: number) {
         try {
-            var beforeFeeTake = Liberum.chain3.fromSha(Liberum.tokenContract.feeTake());
-            var beforeFeeRebate = Liberum.chain3.fromSha(Liberum.tokenContract.feeRebate());
-            if (feeRebate > beforeFeeRebate && feeRebate < beforeFeeTake) {
-                var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeRebate(uint256)').substr(2, 8)
-                    + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeRebate, 'mc')]);
-                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
-                return res;
-            } else {
-                throw new Error('invalid feeTake');
-            }
+            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeRebate(uint256)').substr(2, 8)
+                + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeRebate, 'mc')]);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            return res;
         } catch (error) {
             throw error
         }
