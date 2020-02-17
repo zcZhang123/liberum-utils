@@ -1,6 +1,6 @@
 const BigNumber = require('bignumber.js');
 
-import { asmABI, dappABI, erc20ABI } from './utils/ABIs';
+import { dappABI, erc20ABI, pairsABI } from './utils/ABIs';
 import { chain3Instance } from './utils/index'
 import { InitConfig, Account } from "./model";
 
@@ -13,6 +13,7 @@ class Liberum {
     private static chain3: any;
     private static tokenContract: any;
     private static mcObject: any;
+    private static pairsContract: any;
 
     public static init(InitConfig: InitConfig) {
         try {
@@ -21,9 +22,10 @@ class Liberum {
             Liberum.pairsAddr = InitConfig.pairsAddr;
             Liberum.subchainaddr = InitConfig.subchainAddr;
             Liberum.chain3 = chain3Instance(InitConfig.vnodeUri, InitConfig.scsUri);
-            Liberum.mcObject = Liberum.chain3.microchain(asmABI);
+            Liberum.mcObject = Liberum.chain3.microchain();
             Liberum.mcObject.setVnodeAddress(InitConfig.vnodeVia);
             Liberum.tokenContract = Liberum.mcObject.getDapp(InitConfig.subchainAddr, dappABI, InitConfig.dappAddr);
+            Liberum.pairsContract = Liberum.mcObject.getDapp(InitConfig.subchainAddr, JSON.parse(pairsABI), InitConfig.pairsAddr);
         } catch (error) {
             throw error
         }
@@ -216,12 +218,10 @@ class Liberum {
                 let decimals = tokenContract.decimals();
                 let balance = Liberum.tokenContract.balanceOf(token, address)
                 let data = {
-                    balance: new BigNumber(Liberum.chain3.fromSha(balance)).toString(),
-                    // balance: new BigNumber(Liberum.chain3.fromSha(balance[0])).toString(),
-                    // freeze: new BigNumber(Liberum.chain3.fromSha(balance[1])).toString(),
+                    balance: new BigNumber(Liberum.chain3.fromSha(balance[0])).toString(),
+                    freeze: new BigNumber(Liberum.chain3.fromSha(balance[1])).toString(),
                     erc20Balance: new BigNumber(tokenBalance).dividedBy(Math.pow(10, decimals)).toString()
                 }
-
                 resolve(data);
             } catch (error) {
                 reject(error)
@@ -319,11 +319,9 @@ class Liberum {
      * @param tokenGive 付出Token地址
      * @param account 操作账户
      */
-    public static async getType(tokenGet: string, tokenGive: string, account: Account) {
+    public static async getType(tokenGet: string, tokenGive: string) {
         try {
-            var data = Liberum.pairsAddr + Liberum.chain3.sha3('getType(address, address)').substr(2, 8) +
-                Liberum.chain3.encodeParams(['address', 'address'], [tokenGet, tokenGive]);
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data);
+            let res = Liberum.pairsContract.getType(tokenGet, tokenGive)
             return res;
         } catch (error) {
             throw error
@@ -338,7 +336,7 @@ class Liberum {
      */
     public static async addPair(base: string, counter: string, baseAccount: Account) {
         try {
-            var data = Liberum.pairsAddr + Liberum.chain3.sha3('addPair(address, address)').substr(2, 8) +
+            var data = Liberum.pairsAddr + Liberum.chain3.sha3('addPair(address,address)').substr(2, 8) +
                 Liberum.chain3.encodeParams(['address', 'address'], [base, counter]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
             return res;
@@ -355,7 +353,7 @@ class Liberum {
      */
     public static async removePair(base: string, counter: string, baseAccount: Account) {
         try {
-            var data = Liberum.pairsAddr + Liberum.chain3.sha3('removePair(address, address)').substr(2, 8) +
+            var data = Liberum.pairsAddr + Liberum.chain3.sha3('removePair(address,address)').substr(2, 8) +
                 Liberum.chain3.encodeParams(['address', 'address'], [base, counter]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
             return res;
