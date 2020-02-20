@@ -1,7 +1,7 @@
 const BigNumber = require('bignumber.js');
 
-import { dappABI, erc20ABI, pairsABI } from './utils/ABIs';
-import { chain3Instance } from './utils/index'
+import { dappABI, pairsABI } from './utils/ABIs';
+import { chain3Instance, getBalance, getERC20Balance } from './utils/index'
 import { InitConfig, Account } from "./model";
 
 
@@ -11,6 +11,7 @@ class Liberum {
     private static pairsAddr: string;
     private static subchainaddr: string;
     private static chain3: any;
+    private static scsUri: string;
     private static tokenContract: any;
     private static mcObject: any;
     private static pairsContract: any;
@@ -20,6 +21,7 @@ class Liberum {
             Liberum.vnodeVia = InitConfig.vnodeVia;
             Liberum.dappAddr = InitConfig.dappAddr;
             Liberum.pairsAddr = InitConfig.pairsAddr;
+            Liberum.scsUri = InitConfig.scsUri;
             Liberum.subchainaddr = InitConfig.subchainAddr;
             Liberum.chain3 = chain3Instance(InitConfig.vnodeUri, InitConfig.scsUri);
             Liberum.mcObject = Liberum.chain3.microchain();
@@ -64,7 +66,7 @@ class Liberum {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('changeAccountLevelsAddr(address)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [accountLevelsAddr]);
-            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0);
             return res;
         } catch (error) {
             throw error
@@ -81,7 +83,7 @@ class Liberum {
             if (Liberum.chain3.isAddress(feeAccount)) {
                 var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeAccount(address)').substr(2, 8)
                     + Liberum.chain3.encodeParams(['address'], [feeAccount]);
-                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
                 return res;
             } else {
                 throw new Error('invalid address');
@@ -92,7 +94,7 @@ class Liberum {
     }
 
     /**
-     * 修改成交方手续费,需不高于当前值
+     * 修改成交方手续费
      * @param  {Account} baseAccount 合约部署者账户
      * @param {number} feeMake 手续费
      */
@@ -100,7 +102,7 @@ class Liberum {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeMake(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeMake, 'mc')]);
-            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -108,7 +110,7 @@ class Liberum {
     }
 
     /**
-     *  修改被成交方手续费，需不高于当前值且不小于当前回扣值(feeRebate)
+     *  修改被成交方手续费
      * @param  {Account} baseAccount 合约部署者账户
      * @param {number} feeTake 修改后被成交方的手续费
      */
@@ -116,7 +118,7 @@ class Liberum {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeTake(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeTake, 'mc')]);
-            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -124,7 +126,7 @@ class Liberum {
     }
 
     /**
-     * 修改回扣值，需不小于当前值且不高于被成交方手续费(feeTake)
+     * 修改回扣值
      * @param  {Account} baseAccount 合约部署者账户
      * @param {number} feeRebate 回扣值
      */
@@ -132,7 +134,7 @@ class Liberum {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeRebate(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeRebate, 'mc')]);
-            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -143,11 +145,12 @@ class Liberum {
      * 子链原生币合约充值
      * @param {Account} account 充值账户
      * @param {number} value 充值数量
+     * @param { number } decimal token精度
      */
-    public static async deposit(account: Account, value: number) {
+    public static async deposit(account: Account, value: number, decimal: number) {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('deposit()').substr(2, 8);
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, value, data)
+            let res = await Liberum.sendRawTransaction(account.address, account.secret, value, data, decimal)
             return res;
         } catch (error) {
             throw error
@@ -158,12 +161,13 @@ class Liberum {
      * 子链原生币合约提币
      * @param {Account} account 提币账户
      * @param {number} value 提币数量
+     * 
      */
-    public static async withdraw(account: Account, value: number) {
+    public static async withdraw(account: Account, value: number, decimal: number) {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('withdraw(uint256)').substr(2, 8)
-                + Liberum.chain3.encodeParams(['uint256'], [Liberum.chain3.toSha(value, 'mc')]);
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
+                + Liberum.chain3.encodeParams(['uint256'], [new BigNumber(value).multipliedBy(10 ** decimal)]);
+            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -175,13 +179,14 @@ class Liberum {
      * @param {Account} account 充值账户
      * @param {address} token 充值token地址
      * @param {number} value 充值数量
+     * @param { number } decimal token精度
      */
-    public static async depositToken(account: Account, token: string, value: number) {
+    public static async depositToken(account: Account, token: string, value: number, decimal: number) {
         try {
-            await Liberum.approve(account, Liberum.dappAddr, token, value)
+            await Liberum.approve(account, Liberum.dappAddr, token, value, decimal)
             var data = Liberum.dappAddr + Liberum.chain3.sha3('depositToken(address,uint256)').substr(2, 8)
-                + Liberum.chain3.encodeParams(['address', 'uint256'], [token, Liberum.chain3.toSha(value, 'mc')]);
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
+                + Liberum.chain3.encodeParams(['address', 'uint256'], [token, new BigNumber(value).multipliedBy(10 ** decimal)]);
+            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -193,12 +198,13 @@ class Liberum {
      * @param {Account} account 提现账户
      * @param {address} token 提现token地址
      * @param {number}  value 提现数量
+     * @param { number } decimal token精度
      */
-    public static async withdrawToken(account: Account, token: string, value: number) {
+    public static async withdrawToken(account: Account, token: string, value: number, decimal: number) {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('withdrawToken(address,uint256)').substr(2, 8)
-                + Liberum.chain3.encodeParams(['address', 'uint256'], [token, Liberum.chain3.toSha(value, 'mc')]);
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
+                + Liberum.chain3.encodeParams(['address', 'uint256'], [token, new BigNumber(value).multipliedBy(10 ** decimal)]);
+            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -210,42 +216,44 @@ class Liberum {
      * @param {address} token token地址
      * @param {address} address 查询地址
      */
-    public static balanceOf(token: string, address: string) {
-        return new Promise(function (resolve, reject) {
-            try {
-                let tokenContract = Liberum.mcObject.getDapp(Liberum.subchainaddr, JSON.parse(erc20ABI), token);
-                let tokenBalance = tokenContract.balanceOf(address);
-                let decimals = tokenContract.decimals();
-                let balance = Liberum.tokenContract.balanceOf(token, address)
-                let data = {
-                    balance: new BigNumber(Liberum.chain3.fromSha(balance[0])).toString(),
-                    freeze: new BigNumber(Liberum.chain3.fromSha(balance[1])).toString(),
-                    erc20Balance: new BigNumber(tokenBalance).dividedBy(Math.pow(10, decimals)).toString()
-                }
-                resolve(data);
-            } catch (error) {
-                reject(error)
+    public static async balanceOf(token: string, address: string, decimal: number) {
+        try {
+            var data = Liberum.chain3.sha3('balanceOf(address,address)').substr(0, 10)
+                + Liberum.chain3.encodeParams(['address', 'address'], [token, address]);
+            var res: any = await getBalance(Liberum.scsUri, Liberum.subchainaddr, Liberum.dappAddr, data)
+            var erc20Data = Liberum.chain3.sha3('balanceOf(address)').substr(0, 10)
+                + Liberum.chain3.encodeParams(['address'], [address]);
+            let erc20Balance = await getERC20Balance(Liberum.scsUri, Liberum.subchainaddr, token, erc20Data)
+            let balance = {
+                balance: new BigNumber(res.balance).dividedBy(10 ** decimal).toString(),
+                freeze: new BigNumber(res.freeze).dividedBy(10 ** decimal).toString(),
+                erc20Balance: new BigNumber(erc20Balance).dividedBy(10 ** decimal).toString()
             }
-        })
+            return balance
+        } catch (error) {
+            throw (error)
+        }
     }
 
     /**
      * 创建挂单
      * @param {Account} account 挂单账户
-     * @param {address} tokenGet 交易token地址
-     * @param {number} amountGet 交易token数量
+     * @param {address} tokenGet 获取token地址
+     * @param {number} amountGet 获取token数量
+     * @param { number } tokenGetDecimal 获取token精度
      * @param {address} tokenGive 付出token地址
      * @param {number} amountGive 付出token数量
+     * @param { number } tokenGiveDecimal 付出token精度
      * @param {number} expires 有效区块
      */
-    public static async createOrder(account: Account, tokenGet: string, amountGet: number, tokenGive: string, amountGive: number, expires: number) {
+    public static async createOrder(account: Account, tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, expires: number) {
         try {
             let nonce = Liberum.chain3.scs.getNonce(Liberum.subchainaddr, account.address);
             let blockNum = Liberum.chain3.scs.getBlockNumber(Liberum.subchainaddr) + expires;
             var data = Liberum.dappAddr + Liberum.chain3.sha3('order(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
-                    [tokenGet, Liberum.chain3.toSha(amountGet, 'mc'), tokenGive, Liberum.chain3.toSha(amountGive, 'mc'), blockNum, nonce]);
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
+                    [tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce]);
+            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return { res, nonce, blockNum };
         } catch (error) {
             throw error
@@ -256,15 +264,17 @@ class Liberum {
      * 获取挂单余额
      * @param {address} tokenGet 挂单获取token地址
      * @param  {number} amountGet 挂单获取token数量
+     * @param { number } tokenGetDecimal 挂单获取token精度
      * @param  {address} tokenGive 挂单付出token地址
      * @param  {number} amountGive 挂单付出token数量
+     * @param { number } tokenGiveDecimal 挂单付出token精度
      * @param  {address} user 挂单用户地址
      * @param  {number} nonce 挂单时nonce
      * @param  {number} blockNum 挂单时blockNum
      */
-    public static getAvailableVolume(tokenGet: string, amountGet: number, tokenGive: string, amountGive: number, user: string, nonce: number, blockNum: number) {
+    public static getAvailableVolume(tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, user: string, nonce: number, blockNum: number) {
         try {
-            var res = Liberum.tokenContract.availableVolume(tokenGet, Liberum.chain3.toSha(amountGet, 'mc'), tokenGive, Liberum.chain3.toSha(amountGive, 'mc'), blockNum, nonce, user);
+            var res = Liberum.tokenContract.availableVolume(tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce, user);
             return Liberum.chain3.fromSha(res);
         } catch (error) {
             throw error
@@ -275,15 +285,17 @@ class Liberum {
      * 获取挂单成交额
      * @param  {address} tokenGet 挂单获取token地址
      * @param  {number} amountGet 挂单获取token数量
+     * @param { number } tokenGetDecimal 挂单获取token精度
      * @param  {address} tokenGive 挂单付出token地址
      * @param  {number} amountGive 挂单付出token数量
+     * @param { number } tokenGiveDecimal 挂单付出token精度
      * @param  {address} user 挂单用户地址
      * @param  {number} nonce 挂单时nonce
      * @param  {number} blockNum 挂单时blockNum
      */
-    public static getAmountFilled(tokenGet: string, amountGet: number, tokenGive: string, amountGive: number, user: string, nonce: number, blockNum: number) {
+    public static getAmountFilled(tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, user: string, nonce: number, blockNum: number) {
         try {
-            var res = Liberum.tokenContract.amountFilled(tokenGet, Liberum.chain3.toSha(amountGet, 'mc'), tokenGive, Liberum.chain3.toSha(amountGive, 'mc'), blockNum, nonce, user);
+            var res = Liberum.tokenContract.amountFilled(tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce, user);
             return Liberum.chain3.fromSha(res);
         } catch (error) {
             throw error
@@ -293,20 +305,22 @@ class Liberum {
     /**
      * 取消挂单
      * @param {Account} account 取消账户
-     * @param {address} tokenGet 挂单交易token地址
-     * @param {number} amountGet 挂单交易token数量
+     * @param {address} tokenGet 挂单获取token地址
+     * @param {number} amountGet 挂单获取token数量
+     * @param { number } tokenGetDecimal 挂单获取token精度
      * @param {address} tokenGive 挂单付出token地址
      * @param {number} amountGive 挂单付出token数量
+     * @param { number } tokenGiveDecimal 挂单付出token精度
      * @param {number} nonce 挂单时nonce
      * @param {number} blockNum 挂单时blockNum
      */
-    public static async cancelOrder(account: Account, tokenGet: string, amountGet: number, tokenGive: string, amountGive: number, nonce: number, blockNum: number) {
+    public static async cancelOrder(account: Account, tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, nonce: number, blockNum: number) {
         try {
             var data = Liberum.dappAddr + Liberum.chain3.sha3('cancelOrder(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
-                    [tokenGet, Liberum.chain3.toSha(amountGet, 'mc'), tokenGive, Liberum.chain3.toSha(amountGive, 'mc'), blockNum, nonce]);
+                    [tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce]);
 
-            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
+            let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
         } catch (error) {
             throw error
@@ -338,7 +352,7 @@ class Liberum {
         try {
             var data = Liberum.pairsAddr + Liberum.chain3.sha3('addPair(address,address)').substr(2, 8) +
                 Liberum.chain3.encodeParams(['address', 'address'], [base, counter]);
-            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0);
             return res;
         } catch (error) {
             throw error
@@ -355,7 +369,7 @@ class Liberum {
         try {
             var data = Liberum.pairsAddr + Liberum.chain3.sha3('removePair(address,address)').substr(2, 8) +
                 Liberum.chain3.encodeParams(['address', 'address'], [base, counter]);
-            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0);
             return res;
         } catch (error) {
             throw error
@@ -367,8 +381,9 @@ class Liberum {
      * @param {address} from 发起交易地址
      * @param {string} secret 发起交易地址密钥
      * @param {string} data 交易数据
+     * @param { number } decimal token精度
      */
-    public static sendRawTransaction(from: string, secret: string, value: number, data: string) {
+    public static sendRawTransaction(from: string, secret: string, value: number, data: string, decimal: number) {
         return new Promise(function (resolve, reject) {
             let nonce = Liberum.chain3.scs.getNonce(Liberum.subchainaddr, from);
             var rawTx = {
@@ -377,7 +392,7 @@ class Liberum {
                 nonce: Liberum.chain3.toHex(nonce),
                 gasLimit: Liberum.chain3.toHex("0"),
                 gasPrice: Liberum.chain3.toHex("0"),
-                value: Liberum.chain3.toHex(Liberum.chain3.toSha(value, 'mc')),
+                value: Liberum.chain3.toHex(new BigNumber(value).multipliedBy(10 ** decimal)),
                 chainId: Liberum.chain3.toHex(Liberum.chain3.version.network),
                 via: Liberum.vnodeVia,
                 shardingFlag: "0x1",
@@ -410,7 +425,7 @@ class Liberum {
      * @param tokenAdd token地址
      * @param amount 数量
      */
-    public static approve(account: Account, to: string, tokenAdd: string, amount: number) {
+    public static approve(account: Account, to: string, tokenAdd: string, amount: number, decimal: number) {
         return new Promise(function (resolve, reject) {
             let nonce = Liberum.chain3.scs.getNonce(Liberum.subchainaddr, account.address);
             var rawTx = {
@@ -423,7 +438,7 @@ class Liberum {
                 via: Liberum.vnodeVia,
                 shardingFlag: "0x1",
                 data: tokenAdd + Liberum.chain3.sha3('approve(address,uint256)').substr(2, 8) +
-                    Liberum.chain3.encodeParams(['address', 'uint256'], [to, Liberum.chain3.toSha(amount, 'mc')])
+                    Liberum.chain3.encodeParams(['address', 'uint256'], [to, new BigNumber(amount).multipliedBy(10 ** decimal)])
             };
             var signTx = Liberum.chain3.signTransaction(rawTx, account.secret);
             Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash: string) {
