@@ -1,9 +1,9 @@
 const Chain3 = require('chain3');
-var Web3EthAbi = require('web3-eth-abi');
-var request = require('request');
+const Web3EthAbi = require('web3-eth-abi');
+const request = require('request');
 
 export const chain3Instance = (vnodeUri: string, scsUri: string) => {
-    var chain3 = new Chain3();
+    let chain3 = new Chain3();
     chain3.setProvider(new chain3.providers.HttpProvider(vnodeUri));
     chain3.setScsProvider(new chain3.providers.HttpProvider(scsUri));
     if (!chain3.isConnected()) {
@@ -15,7 +15,7 @@ export const chain3Instance = (vnodeUri: string, scsUri: string) => {
 
 export const getBalance = (scsUri: string, subchainaddr: string, dappAddr: string, data: any) => {
     return new Promise(function (resolve, reject) {
-        var options = {
+        let options = {
             'method': 'POST',
             'url': scsUri,
             'headers': {
@@ -35,7 +35,7 @@ export const getBalance = (scsUri: string, subchainaddr: string, dappAddr: strin
 
 export const getERC20Balance = (scsUri: String, subchainaddr: string, token: string, data: any) => {
     return new Promise(function (resolve, reject) {
-        var options = {
+        let options = {
             'method': 'POST',
             'url': scsUri,
             'headers': {

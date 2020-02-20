@@ -27,7 +27,7 @@ class Liberum {
             Liberum.mcObject = Liberum.chain3.microchain();
             Liberum.mcObject.setVnodeAddress(InitConfig.vnodeVia);
             Liberum.tokenContract = Liberum.mcObject.getDapp(InitConfig.subchainAddr, dappABI, InitConfig.dappAddr);
-            Liberum.pairsContract = Liberum.mcObject.getDapp(InitConfig.subchainAddr, JSON.parse(pairsABI), InitConfig.pairsAddr);
+            Liberum.pairsContract = Liberum.mcObject.getDapp(InitConfig.subchainAddr, pairsABI, InitConfig.pairsAddr);
         } catch (error) {
             throw error
         }
@@ -64,7 +64,7 @@ class Liberum {
      */
     public static async changeAccountLevelsAddr(baseAccount: Account, accountLevelsAddr: string) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeAccountLevelsAddr(address)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('changeAccountLevelsAddr(address)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [accountLevelsAddr]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0);
             return res;
@@ -81,7 +81,7 @@ class Liberum {
     public static async changeFeeAccount(baseAccount: Account, feeAccount: string) {
         try {
             if (Liberum.chain3.isAddress(feeAccount)) {
-                var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeAccount(address)').substr(2, 8)
+                let data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeAccount(address)').substr(2, 8)
                     + Liberum.chain3.encodeParams(['address'], [feeAccount]);
                 let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
                 return res;
@@ -100,7 +100,7 @@ class Liberum {
      */
     public static async changeFeeMake(baseAccount: Account, feeMake: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeMake(uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeMake(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeMake, 'mc')]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
             return res;
@@ -116,7 +116,7 @@ class Liberum {
      */
     public static async changeFeeTake(baseAccount: Account, feeTake: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeTake(uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeTake(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeTake, 'mc')]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
             return res;
@@ -132,7 +132,7 @@ class Liberum {
      */
     public static async changeFeeRebate(baseAccount: Account, feeRebate: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeRebate(uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('changeFeeRebate(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address'], [Liberum.chain3.toSha(feeRebate, 'mc')]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
             return res;
@@ -149,7 +149,7 @@ class Liberum {
      */
     public static async deposit(account: Account, value: number, decimal: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('deposit()').substr(2, 8);
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('deposit()').substr(2, 8);
             let res = await Liberum.sendRawTransaction(account.address, account.secret, value, data, decimal)
             return res;
         } catch (error) {
@@ -165,7 +165,7 @@ class Liberum {
      */
     public static async withdraw(account: Account, value: number, decimal: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('withdraw(uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('withdraw(uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['uint256'], [new BigNumber(value).multipliedBy(10 ** decimal)]);
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
@@ -184,7 +184,7 @@ class Liberum {
     public static async depositToken(account: Account, token: string, value: number, decimal: number) {
         try {
             await Liberum.approve(account, Liberum.dappAddr, token, value, decimal)
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('depositToken(address,uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('depositToken(address,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256'], [token, new BigNumber(value).multipliedBy(10 ** decimal)]);
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
@@ -202,7 +202,7 @@ class Liberum {
      */
     public static async withdrawToken(account: Account, token: string, value: number, decimal: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('withdrawToken(address,uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('withdrawToken(address,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256'], [token, new BigNumber(value).multipliedBy(10 ** decimal)]);
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
             return res;
@@ -218,10 +218,10 @@ class Liberum {
      */
     public static async balanceOf(token: string, address: string, decimal: number) {
         try {
-            var data = Liberum.chain3.sha3('balanceOf(address,address)').substr(0, 10)
+            let data = Liberum.chain3.sha3('balanceOf(address,address)').substr(0, 10)
                 + Liberum.chain3.encodeParams(['address', 'address'], [token, address]);
-            var res: any = await getBalance(Liberum.scsUri, Liberum.subchainaddr, Liberum.dappAddr, data)
-            var erc20Data = Liberum.chain3.sha3('balanceOf(address)').substr(0, 10)
+            let res: any = await getBalance(Liberum.scsUri, Liberum.subchainaddr, Liberum.dappAddr, data)
+            let erc20Data = Liberum.chain3.sha3('balanceOf(address)').substr(0, 10)
                 + Liberum.chain3.encodeParams(['address'], [address]);
             let erc20Balance = await getERC20Balance(Liberum.scsUri, Liberum.subchainaddr, token, erc20Data)
             let balance = {
@@ -250,7 +250,7 @@ class Liberum {
         try {
             let nonce = Liberum.chain3.scs.getNonce(Liberum.subchainaddr, account.address);
             let blockNum = Liberum.chain3.scs.getBlockNumber(Liberum.subchainaddr) + expires;
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('order(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('order(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
                     [tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce]);
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data, 0)
@@ -274,7 +274,7 @@ class Liberum {
      */
     public static getAvailableVolume(tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, user: string, nonce: number, blockNum: number) {
         try {
-            var res = Liberum.tokenContract.availableVolume(tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce, user);
+            let res = Liberum.tokenContract.availableVolume(tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce, user);
             return Liberum.chain3.fromSha(res);
         } catch (error) {
             throw error
@@ -295,7 +295,7 @@ class Liberum {
      */
     public static getAmountFilled(tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, user: string, nonce: number, blockNum: number) {
         try {
-            var res = Liberum.tokenContract.amountFilled(tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce, user);
+            let res = Liberum.tokenContract.amountFilled(tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce, user);
             return Liberum.chain3.fromSha(res);
         } catch (error) {
             throw error
@@ -316,7 +316,7 @@ class Liberum {
      */
     public static async cancelOrder(account: Account, tokenGet: string, amountGet: number, tokenGetDecimal: number, tokenGive: string, amountGive: number, tokenGiveDecimal: number, nonce: number, blockNum: number) {
         try {
-            var data = Liberum.dappAddr + Liberum.chain3.sha3('cancelOrder(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('cancelOrder(address,uint256,address,uint256,uint256,uint256)').substr(2, 8)
                 + Liberum.chain3.encodeParams(['address', 'uint256', 'address', 'uint256', 'uint256', 'uint256'],
                     [tokenGet, new BigNumber(amountGet).multipliedBy(10 ** tokenGetDecimal), tokenGive, new BigNumber(amountGive).multipliedBy(10 ** tokenGiveDecimal), blockNum, nonce]);
 
@@ -350,7 +350,7 @@ class Liberum {
      */
     public static async addPair(base: string, counter: string, baseAccount: Account) {
         try {
-            var data = Liberum.pairsAddr + Liberum.chain3.sha3('addPair(address,address)').substr(2, 8) +
+            let data = Liberum.pairsAddr + Liberum.chain3.sha3('addPair(address,address)').substr(2, 8) +
                 Liberum.chain3.encodeParams(['address', 'address'], [base, counter]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0);
             return res;
@@ -367,10 +367,30 @@ class Liberum {
      */
     public static async removePair(base: string, counter: string, baseAccount: Account) {
         try {
-            var data = Liberum.pairsAddr + Liberum.chain3.sha3('removePair(address,address)').substr(2, 8) +
+            let data = Liberum.pairsAddr + Liberum.chain3.sha3('removePair(address,address)').substr(2, 8) +
                 Liberum.chain3.encodeParams(['address', 'address'], [base, counter]);
             let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0);
             return res;
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
+     * 修改pairs合约地址
+     * @param baseAccount 合约部署者账户
+     * @param pairAddr 修改后的pairs合约地址
+     */
+    public static async changePairAddr(baseAccount: Account, pairAddr: string) {
+        try {
+            if (Liberum.chain3.isAddress(pairAddr)) {
+                let data = Liberum.dappAddr + Liberum.chain3.sha3('changePairAddr(address)').substr(2, 8)
+                    + Liberum.chain3.encodeParams(['address'], [pairAddr]);
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data, 0)
+                return res;
+            } else {
+                throw new Error('invalid address');
+            }
         } catch (error) {
             throw error
         }
@@ -386,7 +406,7 @@ class Liberum {
     public static sendRawTransaction(from: string, secret: string, value: number, data: string, decimal: number) {
         return new Promise(function (resolve, reject) {
             let nonce = Liberum.chain3.scs.getNonce(Liberum.subchainaddr, from);
-            var rawTx = {
+            let rawTx = {
                 from: from,
                 to: Liberum.subchainaddr,
                 nonce: Liberum.chain3.toHex(nonce),
@@ -398,11 +418,11 @@ class Liberum {
                 shardingFlag: "0x1",
                 data: data
             };
-            var signTx = Liberum.chain3.signTransaction(rawTx, secret);
+            let signTx = Liberum.chain3.signTransaction(rawTx, secret);
             Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash: string) {
                 if (!err) {
                     while (true) {
-                        var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
+                        let receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
                         if (receipt && !receipt.failed) {
                             resolve({ "result": "success", "hash": hash });
                             break;
@@ -428,7 +448,7 @@ class Liberum {
     public static approve(account: Account, to: string, tokenAdd: string, amount: number, decimal: number) {
         return new Promise(function (resolve, reject) {
             let nonce = Liberum.chain3.scs.getNonce(Liberum.subchainaddr, account.address);
-            var rawTx = {
+            let rawTx = {
                 from: account.address,
                 to: Liberum.subchainaddr,
                 nonce: Liberum.chain3.toHex(nonce),
@@ -440,11 +460,11 @@ class Liberum {
                 data: tokenAdd + Liberum.chain3.sha3('approve(address,uint256)').substr(2, 8) +
                     Liberum.chain3.encodeParams(['address', 'uint256'], [to, new BigNumber(amount).multipliedBy(10 ** decimal)])
             };
-            var signTx = Liberum.chain3.signTransaction(rawTx, account.secret);
+            let signTx = Liberum.chain3.signTransaction(rawTx, account.secret);
             Liberum.chain3.mc.sendRawTransaction(signTx, function (err, hash: string) {
                 if (!err) {
                     while (true) {
-                        var receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
+                        let receipt = Liberum.chain3.scs.getReceiptByHash(Liberum.subchainaddr, hash);
                         if (receipt && !receipt.failed) {
                             resolve({ "result": "success", "hash": hash });
                             break;
