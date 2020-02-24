@@ -323,6 +323,45 @@ class Liberum {
             let res = await Liberum.sendRawTransaction(account.address, account.secret, 0, data)
             return res;
         } catch (error) {
+
+        }
+    }
+
+    /**
+     * ERC20转账
+     * @param fromAccount 发起转账账户
+     * @param toAddress 转账目标账户
+     * @param tokenAdd 转账Token地址
+     * @param amount 转账数量
+     * @param tokenDecimal 转账Token精度
+     * @param logs 转账备注
+     */
+    public static async transferERC20(fromAccount: Account, toAddress: string, tokenAdd: string, amount: number, tokenDecimal: number, logs: string) {
+        try {
+            let data = tokenAdd + Liberum.chain3.sha3('transfer(address,uint256)').substr(2, 8) +
+                Liberum.chain3.encodeParams(['address', 'uint256'], [toAddress, new BigNumber(amount).multipliedBy(10 ** tokenDecimal)])
+            let memo = Buffer.from(logs).toString('hex')
+            let res = await Liberum.sendRawTransaction(fromAccount.address, fromAccount.secret, 0, data + memo)
+            return res;
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
+     * 原生币转账
+     * @param fromAccount 发起转账账户
+     * @param toAddress 转账目标账户
+     * @param amount 转账数量
+     * @param logs 转账备注
+     */
+    public static async transfer(fromAccount: Account, toAddress: string, amount: number, logs: string) {
+        try {
+            let memo = Buffer.from(logs).toString('hex')
+            let data = toAddress + memo;
+            let res = await Liberum.sendRawTransaction(fromAccount.address, fromAccount.secret, amount, data)
+            return res
+        } catch (error) {
             throw error
         }
     }
