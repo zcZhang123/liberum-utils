@@ -436,6 +436,42 @@ class Liberum {
     }
 
     /**
+     * 修改挂单冻结token数量
+     * @param baseAccount 合约部署者账户
+     * @param newAmount 新的冻结数量
+     */
+    public static async changeFreezeAmount(baseAccount: Account, newAmount: string, tokenDecimal: number, ) {
+        try {
+            let data = Liberum.dappAddr + Liberum.chain3.sha3('changeFreezeAmount(uint256)').substr(2, 8)
+                + Liberum.chain3.encodeParams(['uint256'], [new BigNumber(newAmount).multipliedBy(10 ** tokenDecimal)]);
+            let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+            return res;
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
+     * 修改挂单冻结token地址
+     * @param baseAccount 合约部署者账户
+     * @param newToken 新的冻结币种
+     */
+    public static async changeFreezeToken(baseAccount: Account, newToken: string) {
+        try {
+            if (Liberum.chain3.isAddress(newToken)) {
+                let data = Liberum.dappAddr + Liberum.chain3.sha3('changeFreezeToken(address)').substr(2, 8)
+                    + Liberum.chain3.encodeParams(['address'], [newToken]);
+                let res = await Liberum.sendRawTransaction(baseAccount.address, baseAccount.secret, 0, data)
+                return res;
+            } else {
+                throw new Error('invalid address');
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    /**
      * 发起交易
      * @param {address} from 发起交易地址
      * @param {string} secret 发起交易地址密钥
